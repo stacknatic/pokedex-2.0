@@ -5,24 +5,47 @@ import axios from 'axios';
 const Cards = () => {
     const [pokemons, setPokemons] = useState([])
     const [loaded, setLoaded] = useState(false)
-  
-   useEffect(() => {
-    // if(!loaded){
-        setTimeout(() => {
 
-            axios
-            .get('https://pokeapi.co/api/v2/pokemon-species/?offset=0&limit=151')
-            .then(res => setPokemons(res.data.results))
-            .then(setLoaded(true))
-        }, 1000)
+    useEffect(() => {
+        setLoaded(false);
+        axios
+            .get('https://pokeapi.co/api/v2/pokemon?limit=151&offset=0')
+            .then((response) => {
+                const fetches = response.data.results.map(pokemon => {
+                    return(
+
+                        axios
+                            .get(pokemon.url)
+                            .then(response => response.data)
+                    
+                    )
+                });
+                Promise.all(fetches).then(response => {
+                    setPokemons(response);
+                    setLoaded(true)
+                })
+            })
+    }, [])
+  
+//    useEffect(() => {
+//     // if(!loaded){
+//         setTimeout(() => {
+
+//             axios
+//             .get('https://pokeapi.co/api/v2/pokemon-species/?offset=0&limit=151')
+//             .then(res => setPokemons(res.data.results))
+//             .then(setLoaded(true))
+//         }, 1000)
         
 
-    // }
-   },[])
+//     // }
+//    },[])
 
-   const Card = ({character, id, type}) => {
+   const Card = ({character, id, type, type2, image}) => {
     return(
-            <div className='result-card'>
+        <div className='cards-container'>
+
+            <div className='pokemonCard'>
 
         {/* <p className="result-character">{character}</p> */}
         {/* <p className="result-character-id">{id}</p> */}
@@ -31,23 +54,40 @@ const Cards = () => {
 <span className="result-type">{type}</span>
 </div> */}
         <p>{character}</p>
-        <p>{id}</p>
-        <p>{type}</p>
+        <span className='pokemonGeneration'>{id}</span>
+        <span>{type}</span>
+        <span>{type2}</span>
+        <img src={image} alt={id}></img>
 
             </div>
+</div>
 
     )
    }
 
    const Characters = () => {
        const thecharacters = pokemons.map(pokemon => {
+     
+        const type = () => {
+
+            
+            try {
+                if (pokemon.types[1].type.name) {
+                  return pokemon.types[0].type.name + " " + pokemon.types[1].type.name;
+                }
+              } catch (e) {
+                return pokemon.types[0].type.name
+                ;
+              }
+        }
            return (
 
                <Card 
                 key = {pokemon.name}
                 character = {pokemon.name}
                 id = {pokemon.id}
-                type = {pokemon.type}
+                type = {type()}
+                image = {pokemon.sprites.front_default}
 
                />
            )
@@ -57,7 +97,9 @@ const Cards = () => {
    if(!loaded){
     return(
 
-        <div>...loading the pokemon characters</div>
+            <div>
+                <progress></progress>
+            </div>
     )
    }
 
