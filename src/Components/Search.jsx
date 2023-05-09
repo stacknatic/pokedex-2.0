@@ -1,11 +1,11 @@
 import React from 'react';
 
-const Search = () => {
+const Search = (props) => {
+
     return(
         <form>
             <label htmlFor="search">Search pokemon</label>
-            <input type="text" id="search" name="search" placeholder="enter character name"></input>
-            <button className="pokedex-search-button" type="submit">search</button>
+            <input type="text" id="search" name="search" placeholder="enter character name" onChange={props.searchHandler}></input>
         </form>
     )
 }
